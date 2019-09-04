@@ -1,0 +1,70 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.Text>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@using Igloo.Extensions
+@using Igloo.Models
+@using Umbraco.Web.Models
+@{
+    var order = (int)ViewData["order"];
+}
+<section class="block text white-bg" id="@(order == 0 ? "content" : "")">
+
+    @if (Model.SidebarWidgets != null && Model.SidebarWidgets.Any())
+    {
+        <div class="block-text block-text--sidebar">
+            <div class="container">
+                <div class="row">
+                    <div class="col-66 col-s-100 block-text__main">
+                        @Model.RichText
+                    </div>
+                    <aside class="col-30 col-s-100 block-text__aside">
+
+                        @foreach (var sidebarWidget in Model.SidebarWidgets)
+                        {
+                            var sidebarWidgetType = sidebarWidget.ContentType.Alias;
+                            
+                            @*=====================
+                            # Text
+                            =====================*@
+                            if (sidebarWidgetType == "textSidebar")
+                            {
+                                @Html.Partial("/Views/Partials/Widgets/Text/SidebarText.cshtml", sidebarWidget)
+                            }
+
+                            @*=====================
+                            # Links
+                            =====================*@
+                            if (sidebarWidgetType == "linksSidebar")
+                            {
+                                @Html.Partial("/Views/Partials/Widgets/Text/SidebarLinks.cshtml", sidebarWidget)
+                            }
+                            @*=====================
+                            # Button
+                            =====================*@
+                            if (sidebarWidgetType == "button")
+                            {
+                                <div class="block-text__aside-item block-text__aside-item--button">
+                                    @Html.Partial("/Views/Partials/Widgets/Renderbutton.cshtml", sidebarWidget)
+                                </div>
+                            }
+                        }
+
+                    </aside>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="block-text block-text--single">
+            <div class="container container--small">
+                <div class="row">
+                    <div class="col-100">
+                        @Model.RichText
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    }
+
+</section>

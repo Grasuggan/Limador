@@ -1,0 +1,40 @@
+﻿@using Igloo.Models;
+@using Igloo.Extensions
+@using Umbraco.Web.Models
+@model IPublishedElement
+@{
+	var buttons = Model.Value<List<IPublishedElement>>("buttons");	
+}
+@if(buttons != null && buttons.Any()){
+	<div class="button-wrap">
+		@foreach (var button in buttons){
+			var buttonText =  button.GetValue<string>("buttonText", "");
+			var buttonLink = button.Value<Link>("buttonLink");
+			var buttonClass = "button--theme";
+			var buttonColor = button.GetValue<string>("buttonColor", "");
+			var buttonSize = button.GetValue<string>("buttonSize", "");
+			var borderClass = "";
+			var borderButton = button.GetValue("borderButton", 0);
+			
+			if(borderButton != 0){
+				borderClass = "button--border";
+			}
+
+			if(buttonColor == "000000"){
+				buttonClass = "button--dark";
+			}
+			else if(buttonColor == "0"){
+				buttonClass = "button--dark";
+			}
+			else if(buttonColor == "ffffff"){
+				buttonClass = "button--light";
+			}
+		
+			if(buttonLink != null){
+				<a href="@(buttonLink.Url)" target="@(buttonLink.Target)" title="@(buttonLink.Name)" class="button button--@(buttonSize) @(borderClass) @(buttonClass)">@(buttonText)</a>
+			}
+			
+		}
+	</div>
+}			
+	

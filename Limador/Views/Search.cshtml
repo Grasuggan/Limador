@@ -1,0 +1,82 @@
+﻿@inherits UmbracoViewPage<IPublishedContent>
+@using Igloo.Extensions
+@{
+    Layout = "Master.cshtml";
+    var q = Request["search"] ?? "";
+    var results = new List<PublishedSearchResult>();
+    if (q.IsNotNullOrEmpty())
+    {
+        results = Umbraco.ContentQuery.Search(q, string.Empty)
+                    .Where(x => x.Content.ContentType.Alias == "page" || x.Content.ContentType.Alias == "site" || x.Content.ContentType.Alias == "post" || x.Content.ContentType.Alias == "feed")
+                    .Where(x => x.Content.Root().Id == Model.Root().Id)
+                    .Where(x => !x.Content.Value<bool>("hideFromSearch"))
+                    .ToList();
+    }
+}
+<section class="block search-block gray-bg" id="content">
+
+    <div class="container">
+        <div class="row row--center">
+            <div class="col-50 col-s-100">
+                <form action="@Model.Url" class="search__form">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                    <input type="text" name="search" class="search__input" value="@(q)" placeholder="@Umbraco.GetDictionaryValue("Search Placeholder")">
+                    <button class="search__button hide--m" arial-label="@Umbraco.GetDictionaryValue("Search")"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-result-info">
+        @Umbraco.GetDictionaryValue("Your Search") <strong>"@(q)"</strong> @Umbraco.GetDictionaryValue("Gave") <strong>@(results.Count()) @( results.Count() == 1 ? Umbraco.GetDictionaryValue("Result") : Umbraco.GetDictionaryValue("Results"))</strong>
+    </div>
+
+</section>
+
+<section class="block gray-bg search-results">
+
+    @if (results.Any())
+    {
+        <div class="container container--small">
+            <div class="row row--center">
+                <div class="col-80 col-s-100">
+
+                    @foreach (var result in results)
+                    {
+
+                        var page = result.Content;
+                        var selection = page.Ancestors().ToArray();
+
+                        <article class="search-result">
+                            <h5><a href="@page.Url">@page.Name</a></h5>
+
+                            <ul class="breadcrumbs">
+                                @foreach (var item in selection.OrderBy(x => x.Level))
+                                {
+                                    <li><a href="@item.Url">@item.Name</a></li>
+                                }
+                                <li><a href="@page.Url">@page.Name</a></li>
+                            </ul>
+
+                            <p>
+                                @page.GetValue("metaDescription", "")
+                            </p>
+
+                        </article>
+                    }
+
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="search-empty">
+            <i class="fa fa-search" aria-hidden="true"></i>
+            <h5>@Umbraco.GetDictionaryValue("No Results Found")</h5>
+        </div>
+    }
+
+</section>
+
+@Html.Partial("/Views/Partials/Widgets/RenderWidgets.cshtml")

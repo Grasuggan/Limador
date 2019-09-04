@@ -1,0 +1,123 @@
+﻿@inherits UmbracoViewPage
+@using ContentModels = Umbraco.Web.PublishedModels;
+@using ClientDependency.Core.Mvc
+@using ClientDependency.Core
+@using Igloo.Extensions
+@{
+    Layout = null;
+
+    Html.RequiresCss("~/css/lib/reset.css", 1);
+    Html.RequiresCss("~/css/lib/font-awesome.css", 2);
+    Html.RequiresCss("~/css/lib/photoswipe.css", 3);
+    Html.RequiresCss("~/css/ig-base.css", 1);
+    Html.RequiresCss("~/css/ig-header.css", 1);
+    Html.RequiresCss("~/css/ig-footer.css", 1);
+    Html.RequiresCss("~/css/ig-widgets.css", 1);
+
+    Html.RequiresJs("~/scripts/lib/ls.respimg.min.js", 1);
+    Html.RequiresJs("~/scripts/lib/ls.bgset.min.js", 1);
+    Html.RequiresJs("~/scripts/lib/lazysizes.min.js", 1);
+    Html.RequiresJs("~/scripts/lib/jquery.fitvids.js", 2);
+    Html.RequiresJs("~/scripts/lib/photoswipe.min.js", 3);
+    Html.RequiresJs("~/scripts/lib/photoswipe-ui-default.min.js", 4);
+    Html.RequiresJs("~/scripts/lib/instafeed.js", 5);
+    Html.RequiresJs("~/scripts/lib/flickity.pkgd.min.js", 6);
+    Html.RequiresJs("~/scripts/ig-app.js", 10);
+
+    var googleAnalyticsId = Model.Settings().General.GoogleAnalyticsID;
+    var googleTagManagerID = Model.Settings().General.GoogleTagManagerID;
+    var hideHeader = Model.Value<bool>("hideHeader");
+    var hideFooter = Model.Value<bool>("hideFooter");
+    var search = Model.Root().Children<Search>() != null ? Model.Root().Children<Search>().FirstOrDefault() : null;
+    var enableCookieConsentDialog = Model.Settings().General.EnableCookieConsentDialog;
+    var embedFont = Model.Settings().Theme.EmbedFont;
+    
+    var page = new ContentModels.Page(Umbraco.AssignedContentItem);
+    
+    var enableSubHeader = Model.Root().Value<bool>("enableSubHeader");
+}
+<!DOCTYPE html>
+<html lang="@Culture">
+<head>
+    @Html.Partial("/Views/Partials/Shared/Meta.cshtml")
+    @Html.Raw(embedFont)
+    @Html.RenderCssHere()
+    <link href="/igloo.theme?themeId=@Model.GetThemeID()" type="text/css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    
+    @if(googleTagManagerID != ""){
+        <script>
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','@googleTagManagerID');
+        </script>
+    }
+</head>
+<body class="page-loading  @(enableSubHeader ? "pre-top-visible" : "")">
+    
+    <a href="#content" class="skip-link">@Umbraco.GetDictionaryValue("Jump to content")</a>
+    
+    @if(!hideHeader)
+    {
+        if(enableSubHeader){
+            @Html.Partial("/Views/Partials/Shared/SubHeader.cshtml")
+        }
+        @Html.Partial("/Views/Partials/Shared/Header.cshtml")
+    }
+
+    @RenderBody()
+    
+    @if(!hideFooter)
+    {
+        @Html.Partial("/Views/Partials/Shared/Footer.cshtml", Model.Root())
+    }
+
+    @if(search != null){
+        @Html.Partial("/Views/Partials/Shared/SearchModal.cshtml")
+    }
+    
+    @if(enableCookieConsentDialog){
+        @Html.Partial("/Views/Partials/Shared/CookieConsent.cshtml")
+    }
+    
+    @Html.Partial("/Views/Partials/Shared/PhotoSwipe.cshtml")
+
+    @if (googleAnalyticsId != "")
+    {
+        <script>
+			(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+			function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+			e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+			e.src='https://www.google-analytics.com/analytics.js';
+			r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+			ga('create','@googleAnalyticsId','auto');ga('send','pageview');
+        </script>
+    }
+    
+    <script type="application/ld+json">
+    {
+      "@@context": "http://schema.org",
+      "@@type": "Organization",
+      "url": "@Model.AncestorOrSelf(1).UrlWithDomainPrefix()"
+      @if(Model.GetSettingsMediaUrl("companyLogo") != null){
+        <text>,"logo": "@Model.GetSettingsMediaUrl("companyLogo")"</text>
+      }
+      @if(Model.GetSettingsValue("companyPhoneNumber", "") != ""){
+        <text>,"telephone":"@Model.GetSettingsValue("companyPhoneNumber", "")"</text>
+      }
+    }
+    </script>
+    
+    @Html.RenderJsHere()
+    
+    @RenderSection("bodyEnd", false)
+
+    @if(googleTagManagerID != ""){
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=@(googleTagManagerID)"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    }
+    
+</body>
+</html>

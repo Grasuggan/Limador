@@ -1,0 +1,28 @@
+﻿@inherits UmbracoViewPage
+@using Umbraco.Web.Models
+@using Igloo.Extensions
+@using Igloo.Models
+@{
+    var cookieDialogText = Model.Settings().General.CookieDialogText;
+    var cookieDialogLearnMoreLink = Model.Settings().General.CookieDialogLearnMoreLink;
+    var dismissButtonText = Model.Settings().General.DismissButtonText;
+  
+    var cookieDialogTheme = Model.Settings().General.CookieDialogTheme;
+    var cookieThemeClass = cookieDialogTheme == "ffffff" ? "cookie-consent--light" : "cookie-consent--dark";
+    
+    var cookieDialogPostion = Model.Settings().General.CookieDialogPostion;
+    if(cookieDialogPostion == ""){
+        cookieDialogPostion = "float-left";
+    }
+}
+<div role="dialog" arial-label="Cookie Consent" class="cookie-consent @(cookieThemeClass) cookie-consent--@(cookieDialogPostion) hide--important">
+	<div class="cookie-consent__text">
+		@cookieDialogText
+		@if(cookieDialogLearnMoreLink != null){
+    		<div class="cookie-consent__link">
+    			<a target="@cookieDialogLearnMoreLink.Target" href="@cookieDialogLearnMoreLink.Url" title="@Umbraco.GetDictionaryValue("Learn more")">@Umbraco.GetDictionaryValue("Learn more")</a>
+    		</div>
+		}
+	</div>
+	<button class="button">@dismissButtonText</button>
+</div>

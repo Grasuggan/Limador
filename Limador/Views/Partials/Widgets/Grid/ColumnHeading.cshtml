@@ -1,0 +1,29 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+
+
+var preHeading = column.GetValue<string>("preHeading", "");
+var heading = column.GetValue<string>("heading", "");
+var text = column.GetValue<string>("text", "");
+var centerClass = column.GetConditionalValue<string>("centerContent", "text-center", "");
+
+<div class="grid-item grid-item--header @(centerClass)">
+    @if (preHeading != "")
+    {
+        <h6 class="pre-head">@preHeading</h6>
+    }
+    @if (heading != "")
+    {
+        if (order == 0)
+        {
+            <h1>@heading</h1>
+        }
+        else
+        {
+            <h2>@heading</h2>
+        }
+    }
+    @if (text != "")
+    {
+        @Html.Raw(text)
+    }
+</div>

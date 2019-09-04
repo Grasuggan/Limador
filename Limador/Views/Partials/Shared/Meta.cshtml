@@ -1,0 +1,86 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage
+@using ContentModels = Umbraco.Web.PublishedModels;
+@using Igloo.Models
+@using Igloo.Extensions
+@{
+    var site = Model.AncestorOrSelf<ContentModels.Site>(1);
+    var page = new ContentModels.Page(Umbraco.AssignedContentItem);
+
+    var title = (
+        !string.IsNullOrEmpty(page.MetaTitle) ?
+        page.MetaTitle :
+        !string.IsNullOrEmpty(page.PageAlias) ?
+        page.PageAlias :
+        page.Name) +
+        Model.Settings().General.TitleSignature;
+
+    var description =  !string.IsNullOrEmpty(page.MetaDescription)  ?
+        page.MetaDescription : site.MetaDescription;
+
+    var ogImage = site.MetaImage != null ? site.MetaImage.Url(mode: UrlMode.Absolute) : "";
+    ogImage = page.MetaImage != null ? page.MetaImage.Url(mode: UrlMode.Absolute) : ogImage;
+    ogImage = page.Value<IPublishedContent>("postImage") != null ? page.Value<IPublishedContent>("postImage").Url(mode: UrlMode.Absolute) : ogImage;
+
+    var twitterUsername = Model.Settings().General.TwitterUsername;
+
+    var iconBackgroundColor = Model.Settings().Theme.IconBackgroundColor;
+    if (iconBackgroundColor == "") { iconBackgroundColor = "#FFFFFF"; }
+
+    var favicon = Model.Settings().Theme.Favicon;
+    var appicon = Model.Settings().Theme.AppIcon;
+    
+    var siteName = Model.Settings().General.SiteName;
+    var email =  Model.Settings().General.CompanyEmail;
+    var latitude = Model.Settings().General.CompanyLatitude;
+    var longitude = Model.Settings().General.CompanyLongitude;
+    var phoneNumber = Model.Settings().General.CompanyPhoneNumber;
+}
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>@(title)</title>
+<meta name="description" content="@(description)">
+
+<!-- OG info -->
+<meta property="og:title" content="@(title)" />
+<meta property="og:type" content="website" />
+<meta property="og:description" content="@(description)" />
+<meta property="og:url" content="@(Model.Url(mode: UrlMode.Absolute))">
+<meta name="twitter:card" content="summary_large_image">
+@if (twitterUsername != "") { <meta name="twitter:site" content="@(twitterUsername)"> }
+<meta name="twitter:title" content="@(title)">
+<meta name="twitter:description" content="@(description)">
+@if (ogImage != null){
+    <meta property="og:image" content="@(ogImage)?upscale=false&width=1200" />
+    <meta name="twitter:image" content="@(ogImage)?upscale=false&width=1200">
+}
+
+@if(siteName != ""){ <meta name="og:site_name" content="@siteName" /> }
+@if(email != ""){ <meta name="og:email" content="@email" /> }
+@if(latitude != "" && longitude != ""){ 
+    <meta name="og:latitude" content="@latitude"/>
+    <meta name="og:longitude" content="@longitude"/>
+}
+@if(phoneNumber != ""){ <meta name="og:phone_number" content="@phoneNumber"/> }
+
+<!-- Favicons -->
+@if (appicon != null){
+    <link rel="apple-touch-icon" sizes="57x57" href="@appicon@appicon.GetCropUrl("57x57")">
+    <link rel="apple-touch-icon" sizes="60x60" href="@appicon@appicon.GetCropUrl("60x60")">
+    <link rel="apple-touch-icon" sizes="72x72" href="@appicon@appicon.GetCropUrl("72x72")">
+    <link rel="apple-touch-icon" sizes="76x76" href="@appicon@appicon.GetCropUrl("76x76")">
+    <link rel="apple-touch-icon" sizes="114x114" href="@appicon@appicon.GetCropUrl("114x114")">
+    <link rel="apple-touch-icon" sizes="120x120" href="@appicon@appicon.GetCropUrl("120x120")">
+    <link rel="apple-touch-icon" sizes="144x144" href="@appicon@appicon.GetCropUrl("144x144")">
+    <link rel="apple-touch-icon" sizes="152x152" href="@appicon@appicon.GetCropUrl("152x152")">
+    <link rel="apple-touch-icon" sizes="180x180" href="@appicon@appicon.GetCropUrl("180x180")">
+}
+@if (favicon != null){
+    <link rel="icon" type="image/png" sizes="192x192" href="@favicon@favicon.GetCropUrl("32x32")">
+    <link rel="icon" type="image/png" sizes="32x32" href="@favicon@favicon.GetCropUrl("32x32")">
+    <link rel="icon" type="image/png" sizes="96x96" href="@favicon@favicon.GetCropUrl("96x96")">
+    <link rel="icon" type="image/png" sizes="16x16" href="@favicon@favicon.GetCropUrl("16x16")">
+    <meta name="msapplication-TileColor" content="@(iconBackgroundColor)">
+    <meta name="msapplication-TileImage" content="@favicon@favicon.GetCropUrl("144x144")">
+}

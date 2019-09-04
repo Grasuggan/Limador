@@ -1,0 +1,23 @@
+﻿@inherits UmbracoViewPage
+@{
+    var searchPage = Model.Root().Children<Search>() != null ? Model.Root().Children<Search>().FirstOrDefault() : null;
+}
+@if(searchPage != null){
+    <div class="search" role="dialog" arial-label="@Umbraco.GetDictionaryValue("Search")">
+    
+    	<div class="search__stage">
+    
+    		<form action="@searchPage.Url" class="search__form">
+    			<i class="fa fa-search" aria-hidden="true"></i>
+    			<input type="text" name="search" required class="search__input" placeholder="@Umbraco.GetDictionaryValue("Search Placeholder")">
+    			<button class="search__button hide--m" disabled title="@Umbraco.GetDictionaryValue("Search")"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+    		</form>
+    
+    	</div>
+    	
+    	<button class="search__close" title="@Umbraco.GetDictionaryValue("Close") (Esc)" tabindex="0"><i class="fa fa-times" aria-hidden="true"></i></button>
+    
+    </div>
+    
+    <div class="search-overlay"></div>
+}

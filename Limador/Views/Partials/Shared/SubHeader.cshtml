@@ -1,0 +1,93 @@
+﻿@using Igloo.Extensions
+@using Igloo.Models
+@using Umbraco.Web.Models
+@inherits UmbracoViewPage
+@{
+    var site = Model.AncestorOrSelf<Site>(1);
+    var headerTheme = Model.Settings().Theme.HeaderBackgroundColor == "ffffff" ? "pre-top--light" : "pre-top--dark";
+	var scrollClass = "";
+	var transparentHeader = Model.Value<bool>("transparentHeader");
+	var transparentHeaderColor = Model.Value<string>("transparentHeaderColor");
+	
+	var subHeaderLeft = site.SubHeaderLeft;
+	var subHeaderRight = site.SubHeaderRight;
+	
+	if(transparentHeader){
+	    scrollClass = transparentHeaderColor == "ffffff" ? "pre-top--scroll-bg pre-top--scroll-light" : "pre-top--scroll-bg pre-top--scroll-dark";
+	}
+	
+	var containerWidth = Model.Settings().Theme.HeaderContainerWidth;
+    var containerWidthClass = "container";
+    switch(containerWidth)
+	{
+		case "small":
+			containerWidthClass = "container container--small";
+			break;  
+		case "standard":
+			containerWidthClass = "container";
+			break;  
+		case "big":
+			containerWidthClass = "container container--big";
+			break;  
+		case "full width":
+			containerWidthClass = "container-fluid";
+			break;  
+	}
+}
+
+<div class="pre-top @(headerTheme) @(scrollClass)">
+
+	<div class="@(containerWidthClass)">
+		<div class="row">
+			<div class="col-100">
+
+				<div class="pre-top__inner">
+
+                    @if(subHeaderLeft != null && subHeaderLeft.Any()){
+    					<ul class="pre-top__list pre-top__list--left">
+    					    @ListMenuItems(subHeaderLeft)
+    					</ul>
+					}
+					
+                    @if(subHeaderRight != null && subHeaderRight.Any()){
+    					<ul class="pre-top__list pre-top__list--right">
+    					    @ListMenuItems(subHeaderRight)
+    					</ul>
+					}
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+</div>
+
+@helper ListMenuItems(IEnumerable<SubHeaderItem> items){
+    foreach(var item in items){
+        <li>
+            @if(item.Link != null){
+                <a href="@item.Link.Url" target="@item.Link.Target">
+                    @if(item.Icon != ""){
+	                    <i class="fa @item.Icon pre-top__icon" style="@(item.CustomIconColor != "" ? "color:"+ item.CustomIconColor +"" : "")" aria-hidden="true"></i>
+	                }
+                    @item.Title
+                    
+                    @if(item.NavChildren != null && item.NavChildren.Any()){ <i class="fa fa-caret-down" aria-hidden="true"></i> }
+                </a>
+            }
+            else{
+                if(item.Icon != ""){
+                    <i class="fa @item.Icon pre-top__icon" style="@(item.CustomIconColor != "" ? "color:"+ item.CustomIconColor +"" : "")" aria-hidden="true"></i>
+                }
+                @item.Title
+            }
+            
+            @if(item.NavChildren != null && item.NavChildren.Any()){
+                <ul>
+                    @ListMenuItems(item.NavChildren)
+                </ul>
+            }
+        </li>
+    }
+} 

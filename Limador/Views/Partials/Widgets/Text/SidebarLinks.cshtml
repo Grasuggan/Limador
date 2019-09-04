@@ -1,0 +1,39 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.LinksSidebar>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+    var links = Model.Links;
+    var subpagesTo = Model.SubpagesTo;
+}
+
+<div class="block-text__aside-item block-text__aside-item--links @(Model.Boxed ? "block-text__aside-item--boxed" : "")">
+
+    @if (Model.Heading != "")
+    {
+        <h6>@Model.Heading</h6>
+    }
+
+    <ul>
+        @if (links != null && links.Any())
+        {
+            foreach (var link in links)
+            {
+                <li class="@(link.Url == Umbraco.AssignedContentItem.Url ? "selected" : "")"><a href="@(link.Url)" target="@(link.Target)">@link.Name</a></li>
+            }
+        }
+        @if (subpagesTo != null && subpagesTo.Any())
+        {
+            foreach (var subPage in subpagesTo)
+            {
+                var pages = Umbraco.Content(subPage.Udi).Children()
+                            .Where(x => x.IsVisible())
+                            .Where(x => x.ContentType.Alias != "sitemap" && x.ContentType.Alias != "websiteSettings");
+              
+                foreach (var page in pages)
+                {
+                    <li class="@(page.Url == Umbraco.AssignedContentItem.Url ? "selected" : "")"><a href="@page.Url">@page.Name</a></li>
+                }
+            }
+        }
+    </ul>
+
+</div>

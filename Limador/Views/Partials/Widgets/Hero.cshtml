@@ -1,0 +1,103 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.Hero>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@{
+    var order = (int)ViewData["order"];
+   
+    var textColorClass = Model.TextColor == "000000" ? "" : "light-color";
+    var overlayClass = Model.TextColor == "000000" ? "overlay--light" : "";
+
+    var animateClass = Model.Animate ? "hero--animate" : "";
+
+    var containerWidthClass = "container";
+    switch (Model.ContainerWidth)
+    {
+        case "small":
+            containerWidthClass = "container container--small";
+            break;
+        case "standard":
+            containerWidthClass = "container";
+            break;
+        case "big":
+            containerWidthClass = "container container--big";
+            break;
+        case "full width":
+            containerWidthClass = "container-fluid";
+            break;
+    }
+}
+<section class="hero hero--@(Model.HeroHeight) @(overlayClass) @(animateClass) hero--v-@(Model.VerticalTextAlignment)" id="@(order == 0 ? "content" : "")">
+
+    <div class="hero__inner">
+        <div class="@(containerWidthClass)">
+            <div class="row row--@Model.TextAlignment">
+                <div class="hero__inner @(textColorClass) col-@(Model.TextWidth) col-m-100">
+
+                    @if (Model.PreHeading != "")
+                    {
+                        <h5 class="pre-head">@Model.PreHeading</h5>
+                    }
+                    @if (Model.Heading != "")
+                    {
+                        if (order == 0)
+                        {
+                            <h1>@Model.Heading</h1>
+                        }
+                        else
+                        {
+                            <h2>@Model.Heading</h2>
+                        }
+                    }
+                    @if(Model.Text.ToString() != "")
+                    {
+                        <div class="hero__text">
+                            @Model.Text
+                        </div>
+                    }
+                    
+                    @if(Model.Buttons != null && Model.Buttons.Any()){
+                        <div class="button-wrap">
+                            @foreach(var button in Model.Buttons){
+                                @Html.Partial("/Views/Partials/Widgets/RenderButton.cshtml", button)
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    @if(Model.Background != null){
+    
+        var backgroundMediaUrl = Model.Background.Url();
+    
+        if(backgroundMediaUrl.Contains(".mp4")){
+            <div class="hero__video">
+                <video class="hero__video-player" playsinline muted loop autoplay>
+                    <source src="@(backgroundMediaUrl)" type="video/mp4">
+                </video>
+            </div>
+            <button class="video-mute" title="Toggle sound">
+                <i class="fa fa-volume-up" aria-hidden="true"></i>
+    			<i class="fa fa-volume-off" aria-hidden="true"></i>
+            </button>
+        }
+        else{
+            <div class="hero__background lazyload"
+                 data-bgset="@(backgroundMediaUrl)?width=1280 1280w,
+        		@(backgroundMediaUrl)?width=1600 1600w,
+        		@(backgroundMediaUrl)?width=1920 1920w"
+                 data-sizes="auto">
+            </div>
+        }
+    
+    }
+
+    <div class="overlay @(overlayClass)" style="opacity:0.@(Model.OverlayOpacity)"></div>
+
+    @if (order == 0 && Model.HeroHeight == 100)
+    {
+        <i class="icon-scroll fa fa-chevron-down @(overlayClass)" aria-hidden="true"></i>
+    }
+
+</section>

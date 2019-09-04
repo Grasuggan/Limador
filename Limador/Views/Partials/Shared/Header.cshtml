@@ -1,0 +1,72 @@
+﻿@using Igloo.Extensions
+@inherits UmbracoViewPage
+@{
+    var site = Model.Root();
+	var headerLogoOnLight = Model.Settings().Theme.HeaderLogoOnLight != null ? Model.Settings().Theme.HeaderLogoOnLight.Url : "";
+	var headerLogoOnDark = Model.Settings().Theme.HeaderLogoOnDark != null ? Model.Settings().Theme.HeaderLogoOnDark.Url : "";
+	var headerTheme = Model.Settings().Theme.HeaderBackgroundColor == "ffffff" ? "top--light" : "top--dark";
+	var scrollClass = "";
+	var transparentHeader = Model.Value<bool>("transparentHeader");
+	var transparentHeaderColor = Model.Value<string>("transparentHeaderColor");
+	var siteName = Model.Settings().General.SiteName;
+	var companyName = Model.Settings().General.CompanyName;
+	
+	var searchPage = Model.Root().Children<Search>() != null ? Model.Root().Children<Search>().FirstOrDefault() : null;
+		
+	if(transparentHeader){
+	    scrollClass = transparentHeaderColor == "ffffff" ? "top--scroll-bg top--scroll-light" : "top--scroll-bg top--scroll-dark";
+	}
+	
+	var containerWidth = Model.Settings().Theme.HeaderContainerWidth;
+    var containerWidthClass = "";
+    switch(containerWidth)
+	{
+		case "small":
+			containerWidthClass = "top--small-width";
+			break;  
+		case "standard":
+			containerWidthClass = "";
+			break;  
+		case "big":
+			containerWidthClass = "top--big-width";
+			break;  
+		case "full width":
+			containerWidthClass = "top--full-width";
+			break;  
+	}
+}
+<header class="top @(headerTheme) @(containerWidthClass) @(scrollClass)">
+	<div class="top-inner">
+	    
+		<a href="@site.Url" class="logo logo--on-light" title="@siteName">
+			<img src="@(headerLogoOnLight)" alt="@companyName">
+		</a>
+		<a href="@site.Url" class="logo logo--on-dark" title="@siteName">
+			<img src="@(headerLogoOnDark)" alt="@companyName">
+		</a>
+		
+		<nav class="mobile-actions">
+			<ul>
+			    @if(searchPage != null){
+    				<li class="toggle-search">
+    				    <a href="#" title="@Umbraco.GetDictionaryValue("Search")">
+    				        <i class="fa fa-search" aria-hidden="true"></i>
+    				    </a>
+    				</li>
+				}
+				<li>
+				    <button class="hamburger" type="button" aria-label="Show navigation">
+            		  <span class="hamburger-box">
+            		    <span class="hamburger-inner"></span>
+            		  </span>
+            		</button>
+				</li>
+			</ul>
+		</nav>
+
+		<nav class="main-nav">
+			@Html.Partial("/Views/Partials/Shared/Navigation.cshtml")
+		</nav>
+		
+	</div>
+</header>

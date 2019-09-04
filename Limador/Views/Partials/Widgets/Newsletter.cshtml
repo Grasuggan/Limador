@@ -1,0 +1,94 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<ContentModels.Newsletter>
+@using ContentModels = Umbraco.Web.PublishedModels;
+@using Igloo.Extensions
+@{
+    var buttonClass = "button--theme";
+	
+	if(Model.ButtonColor == "000000"){
+		buttonClass = "button--dark";
+	}
+	else if(Model.ButtonColor == "ffffff"){
+		buttonClass = "button--light";
+	}
+	
+	var newsletterEmailMarketingProvider = Umbraco.AssignedContentItem.Settings().General.NewsletterEmailMarketingProvider;
+	var newsletterDefaultSubscriberListID = Umbraco.AssignedContentItem.Settings().General.NewsletterDefaultSubscriberListID;
+	
+	if(Model.ListID != ""){
+		newsletterDefaultSubscriberListID = Model.ListID;
+	}
+	
+	var pageID = Umbraco.AssignedContentItem.Id;
+	
+    var textColorClass = Model.TextColor == "ffffff" ? "light-color" : ""; 
+	
+	var backgroundColorClass = "white-bg";
+	if(Model.BackgroundColor != ""){
+	    switch(Model.BackgroundColor)
+    	{
+    		case "ffffff":
+    			backgroundColorClass = "white-bg";
+    			break;  
+    		case "000000":
+    			backgroundColorClass = "dark-bg";
+    			break;  
+    		case "eeeeee":
+    			backgroundColorClass = "gray-bg";
+    			break;  
+    		default:
+    		    backgroundColorClass = "theme-bg";
+    		    break;
+    	}
+	}
+	
+	var backgroundMediaUrl = Model.BackgroundImage != null ? Model.BackgroundImage.Url : "";
+	
+    if (backgroundMediaUrl != "")
+    {
+        backgroundColorClass = "";
+	}
+}
+	
+<section class="newsletter @(backgroundColorClass) @(textColorClass)">
+		
+	<div class="newsletter__inner">
+		@if(Model.Heading != ""){
+			<h2 class="h3">@Model.Heading</h2>
+		}
+		
+		@Model.Text
+
+		@if(newsletterEmailMarketingProvider == "MailChimp"){
+			<form action="/umbraco/Surface/Newsletter/AddMailchimpMember" data-thankyoumessage="@Umbraco.GetDictionaryValue("Thank you")">
+				<input type="hidden" name="listID" value="@(newsletterDefaultSubscriberListID)" />
+				<input type="hidden" name="pageID" value="@(pageID)" />
+				<label for="newsletter-email" class="sr-only">@Umbraco.GetDictionaryValue("Email")</label>
+				<input type="email" name="email" id="newsletter-email" required placeholder="@Model.PlaceholderText">
+				<button class="button button--block @(buttonClass)" aria-label="Sign up for newsletter"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+			</form>
+		} else if(newsletterEmailMarketingProvider == "Campaign Monitor"){
+			<form action="/umbraco/Surface/Newsletter/AddCampaignMonitorMember" data-thankyoumessage="@Umbraco.GetDictionaryValue("Thank you")">
+				<input type="hidden" name="listID" value="@(newsletterDefaultSubscriberListID)" />
+				<input type="hidden" name="pageID" value="@(pageID)" />
+				<label for="newsletter-email" class="sr-only">@Umbraco.GetDictionaryValue("Email")</label>
+				<input type="email"  name="email" id="newsletter-email" required placeholder="@Model.PlaceholderText">
+				<button class="button button--block @(buttonClass)" aria-label="Sign up for newsletter"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+			</form>
+		}
+		@if(Model.SmallText != ""){
+			<p class="newsletter__disclaimer">
+				@Model.SmallText
+			</p>
+		}
+	</div>
+	
+	@if (backgroundMediaUrl != ""){
+		<div class="block__background lazyload"
+		    data-bgset="@(backgroundMediaUrl)?upscale=false&width=1280 1280w,
+    		@(backgroundMediaUrl)?upscale=false&width=1600 1600w,
+    		@(backgroundMediaUrl)?upscale=false&width=1920 1920w"
+    		data-sizes="auto">
+		</div>
+	}
+
+</section>

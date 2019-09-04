@@ -1,0 +1,201 @@
+﻿@using Igloo.Models
+@using Igloo.Extensions
+@using Umbraco.Web.Models
+@using System.Globalization
+@using System.Threading
+@inherits UmbracoViewPage
+@{ 
+	var site = Model.AncestorOrSelf<Site>(1);
+	var selection = site.Children().Where(x => x.IsVisible() && x.ContentType.Alias != "websiteSettings"  && x.ContentType.Alias != "sitemap");
+	const string selectedClass = "selected";
+	var searchPage = Model.Root().Children<Search>() != null ? Model.Root().Children<Search>().FirstOrDefault() : null;
+}
+
+<ul>
+	@if(site.HeaderPhoneNumber != ""){
+		<li class="mobile-contact"><a href="tel:@(site.HeaderPhoneNumber)"><i class="fa fa-phone" aria-hidden="true"></i> @(site.HeaderPhoneNumber)</a></li>
+	}
+	@if(site.HeaderEmail != ""){
+		<li class="mobile-contact"><a href="mailto:@(site.HeaderEmail)"><i class="fa fa-envelope" aria-hidden="true"></i> @(site.HeaderEmail)</a></li>
+	}
+	
+	@if(site.CustomNavigation != null && site.CustomNavigation.Any()){
+	     foreach (var nav in site.CustomNavigation){
+	         var link = nav.NavLink;
+	         var name = nav.NavName;
+        
+        	 if(link != null){
+        	  
+	            <li class="@((link.Url == Model.Url) ? "selected" : "")">
+	                
+	                @if(nav.NavChildren != null && nav.NavChildren.Any()){
+	                    <a href="@(link.Url)">@(name) <i class="fa fa-chevron-down" aria-hidden="true"></i><button class="expand" tabindex="0" aria-label="Expand"><i class="fa fa-plus" aria-hidden="true"></i></button></a>
+	                    <ul>
+	                       @foreach (var navChild in nav.NavChildren){
+	                           var childName = navChild.NavName;
+	                           var childLink = navChild.NavLink;
+	                           var babys = navChild.NavChildren;
+	                           
+	                           if(childLink != null){
+    	                           <li class="@((childLink.Url == Model.Url) ? "selected" : "")">
+    	                                
+    	                                @if(babys != null && babys.Any()){
+    	                                    <a href="@(childLink.Url)">@(childName) <i class="fa fa-chevron-right" aria-hidden="true"></i><button class="expand" tabindex="0"  aria-label="Expand"><i class="fa fa-plus" aria-hidden="true"></i></button></a>
+    	                                    <ul>
+    	                                         @foreach (var baby in babys){
+    	                                            var babyName = baby.NavName;
+                        	                        var babyLink = baby.NavLink;
+                        	                        
+                        	                        <li class="@((babyLink.Url == Model.Url) ? "selected" : "")">
+                        	                            <a href="@(babyLink.Url)">@(babyName)</a>
+                        	                        </li>
+                        	                           
+    	                                         }
+    	                                    </ul>
+    	                                }
+    	                                else{
+    	                                    <a href="@(childLink.Url)">@(childName)</a>
+    	                                }
+    	                           </li>
+	                           }
+	                       }
+	                    </ul>
+	                }
+	                else{
+	                    <a href="@(link.Url)">@(name)</a>
+	                }
+	                
+	            </li>
+	        }
+	     }
+	}
+	else{
+	    
+	    if(site.IsVisible()){
+    		<li class="@(Model.IsAncestorOrSelf(site) ? selectedClass : null)">
+    			<a href="@site.Url">@(site.PageAlias != "" ? site.PageAlias : site.Name)</a>
+    		</li>
+    	}
+	
+    	foreach (var item in selection){
+    		var subpages = item.Children().Where(x => x.IsVisible());
+    		
+    		<li class="@(item.IsAncestorOrSelf(Model) ? selectedClass : null)">
+    			@if(subpages.Any() && item.ContentType.Alias != "feed"){
+    				<a href="@item.Url">@(item.GetValue<string>("pageAlias", null) ?? item.Name) <i class="fa fa-chevron-down" aria-hidden="true"></i><button class="expand" tabindex="0" aria-label="Expand"><i class="fa fa-plus" aria-hidden="true"></i></button></a>
+    				<ul>
+    					@foreach (var subpage in subpages){
+    					
+    						var babys = subpage.Children().Where(x => x.IsVisible());
+    					   
+    						<li class="@(subpage.IsAncestorOrSelf(Model) ? selectedClass : null)">
+    						   
+    							@if(babys.Any() && subpage.ContentType.Alias != "feed"){
+    								<a href="@subpage.Url">@(subpage.GetValue<string>("pageAlias", null) ?? subpage.Name) <i class="fa fa-chevron-right" aria-hidden="true"></i><button class="expand" tabindex="0" aria-label="Expand"><i class="fa fa-plus" aria-hidden="true"></i></button></a>
+    								<ul>
+    									@foreach (Umbraco.Web.PublishedModels.Page baby in babys){
+    										<li class="@(baby.IsAncestorOrSelf(Model) ? selectedClass : null)">
+    											<a href="@baby.Url">@(baby.GetValue<string>("pageAlias", null) ?? baby.Name)</a>
+    										</li>
+    									}
+    								</ul>
+    							}
+    							else{
+    								<a href="@subpage.Url">@(subpage.GetValue<string>("pageAlias", null) ?? subpage.Name)</a>
+    							}
+    							
+    						</li>
+    					}
+    				</ul>
+    			}
+    			else if(item.ContentType.Alias != "sitemap"){
+    				<a href="@item.Url">@(item.GetValue<string>("pageAlias", null) ?? item.Name)</a>		
+    			}			
+    		</li>
+    	}
+	}
+	
+	@if(searchPage != null){
+    	<li class="toggle-search hide--m">
+    		<a href="" title="@Umbraco.GetDictionaryValue("Search")">
+    		    <i class="fa fa-search" aria-hidden="true"></i>
+    		</a>
+    	</li>
+	}
+	
+	@if(site.EnableSubHeader){
+	    var subHeaderLeft = site.SubHeaderLeft;
+	    var subHeaderRight = site.SubHeaderRight;
+	    
+	    if(subHeaderLeft != null && subHeaderLeft.Any()){
+		    @ListMenuItems(subHeaderLeft)
+		}
+		
+        if(subHeaderRight != null && subHeaderRight.Any()){
+			@ListMenuItems(subHeaderRight)
+		}
+	}
+	
+	@if(Model.Cultures != null && Model.Cultures.Count() > 1){
+    	<li class="lang">
+    	    <a href="#"><img src="@Model.GetCulture().GetFlag()"/> <span>@Capitalize(Thread.CurrentThread.CurrentUICulture.NativeName)</span><button class="expand" tabindex="0" aria-label="Expand"><i class="fa fa-plus" aria-hidden="true"></i></button></a>
+    	    <ul class="go-right">
+            	@foreach (var (culture, infos) in Model.Cultures)
+                {
+                    CultureInfo ci = new CultureInfo(culture);
+                    
+                   <li><a href="@Model.Url(culture)" title="@ci.NativeName"><img src="@infos.GetFlag()"/>&nbsp;<span>@Capitalize(ci.NativeName)</span></a></li>
+                }
+            </ul>
+        </li>
+    }
+
+	@if(site.HeaderButtons != null && site.HeaderButtons.Any()){
+		foreach (var button in site.HeaderButtons){
+		    <li class="btn">
+                @Html.Partial("/Views/Partials/Widgets/Renderbutton.cshtml", button)
+            </li>
+		}
+	}
+	
+</ul>
+
+@helper Capitalize(string word){
+    if(!string.IsNullOrWhiteSpace(word)) {
+        @(char.ToUpper(word[0]) + word.Substring(1))
+    }
+}
+
+@helper ListMenuItems(IEnumerable<SubHeaderItem> items){
+
+    foreach(var item in items){
+        var title = item.Title;
+        var link = item.Link;
+        var icon = item.Icon;
+        var iconColor = item.CustomIconColor;
+        var navChildren = item.NavChildren;
+        
+        if(link != null){
+            <li class="show--m top-nav-mobile">
+                
+                <a href="@link.Url" target="@link.Target">
+                    @if(icon != ""){
+	                    <i class="fa @icon pre-top__icon" style="@(iconColor != "" ? "color:"+ iconColor +"" : "")" aria-hidden="true"></i>
+	                }
+                    @title
+                    
+                    @if(navChildren != null && navChildren.Any()){ 
+                        <button class="expand" tabindex="0" aria-label="Expand"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                    }
+                </a>
+                
+                @if(navChildren != null && navChildren.Any()){
+                    <ul>
+                        @ListMenuItems(navChildren)
+                    </ul>
+                }
+                
+            </li>
+        }
+    }
+}
