@@ -43,6 +43,10 @@
 			containerWidthClass = "split--full";
 			break;  
 	}
+	
+	var imageCount = Model.Images;
+	var count = 1;
+	
 }
 
 <section class="split-wrap @(backgroundColorClass) @(textColorClass)" id="@(order == 0 ? "content" : "")">
@@ -83,7 +87,7 @@
     	
     	@if (Model.Images != null)
     	{
-    		<div class="split__image split__image--@Model.Images.Count() @removeImageBorder @containImage">
+    		<div class="split__image split__image--@count @removeImageBorder @containImage">
     			@foreach (var mediaItem in Model.Images)
             	{	
     				<div class="split__image-item lazyload"
